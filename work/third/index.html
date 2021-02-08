@@ -24,17 +24,24 @@
     </div>
     <script src="../../common/js/jquery.js"></script>
     <script>
-      // 今回やるのはタブメニューです。
-      // navの小要素であるliをクリックして、contents内の小要素であるli要素を表示させる。
-      // .index() 要素のindexを取得します。
-      // .eq() 引数に応じたindexの要素を指定します。
-      // .addClass() クラスを追加します。
-      // .removeClass() クラスを削除します。
-      $('.nav').find('li').click(function(){
-        var navNum = $(this).index();
-        $('.contents').find('li').addClass('is-hidden');
-        $('.contents').find('li').eq(navNum).removeClass('is-hidden');
-      })
+      $(function(){
+        // 今回やるのはタブメニューです。
+        // navの小要素であるliをクリックして、contents内の小要素であるli要素を表示させる。
+        // .index() 要素のindexを取得します。
+        // .eq() 引数に応じたindexの要素を指定します。
+        // .addClass() クラスを追加します。
+        // .removeClass() クラスを削除します。
+        $('.nav').find('li').click(function(){
+          var navNum = $(this).index();
+          $('.contents').find('li').addClass('is-hidden');
+          $('.contents').find('li').eq(navNum).removeClass('is-hidden');
+        })
+        // .navの中のリスト要素をクリックした時、次の関数を実行する
+        // .navのリスト要素の順番を取得する変数navNumを宣言する
+        // .contentsのリスト要素に.is-hiddenというクラス名を追加する。
+        // .contentsのリスト要素に、navNumの引数に応じたindexの要素を指定して、
+        // そのリスト要素の.is-hiddenクラスを削除する
+      });
     </script>
   </body>
 </html>

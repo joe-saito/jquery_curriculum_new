@@ -69,12 +69,13 @@
 </div>
 <script src="../../common/js/jquery.js"></script>
 <script>
+// $(function(){})は「HTML要素を読み込んでからjQueryを実行する」という意味
   $(function(){
 // 第1問  id='q1'の要素の文字色を赤色にせよ。
     $('#q1').css('color', 'red');
 // 第2問  id='q2'の要素をクリックしたら背景色をピンクにせよ。
     $('#q2').click(function(){
-      $(this).css('background-color', 'cadetblue');
+      $(this).css('background-color', 'pink');
     })
 // 第3問  id='q3'の要素をクリックしたら2秒かけてフェードアウトさせよ。
     $('#q3').click(fadeOut);
@@ -91,7 +92,11 @@
               // beforeは指定の要素の前に追加する
              .after('DOMの後') 
               // afterは指定の要素の後に追加する
+
+          // この形はメゾットチェーンと呼ぶ。
+          // $(セレクタ).メゾット().メゾット()
     })
+
 // 第5問  id='q5'の要素をクリックしたらこの要素にlargeというクラスを付与せよ。
     $('#q5').click(function(){
       $(this).addClass('large')
@@ -101,33 +106,51 @@
     $('#q6').click(function(){
       $(this).animate({
         'marginLeft': 100,
-        // margin-left: 100px⇦CSSで書くとこうなる
+        // margin-left: 100px👈CSSで書くとこうなる
         // CSSのプロパティをここで設定している。
         'marginTop': 100
       },2000);
     })
+
+
 // 第7問  id='q7'の子要素をクリックしたら、その要素のインデックス（何番目か）をconsole.log()とalert()を用いて表示させよ。
     $('#q7').find('li').click(function(){
       var targetNum = $(this).index()
       console.log(targetNum)
       alert(targetNum)
     })
+
+    // .find()👉$(セレクタ)の子要素を取得するメソッド
+    // .index()👉指定した要素の順番を取得するメソッド
+
+
 // 第8問  id='q8'の要素をhoverしたらlargeというクラスを付与し、hoverが外れたら、クラスを削除せよ。
     $('#q8').hover(function(){
       $(this).addClass('large')
     },function(){
       $(this).removeClass('large')
     });
+    // .hover()👉$(セレクタ)をホバーした時のイベント
+    // .addClass('クラス名')👉$(セレクタ)に('クラス名')を追加する
+    // .removeClass('クラス名')👉$(セレクタ)の('クラス名')を削除する
+
+
 // 第9問  id='q9'の要素をクリックしたらこの要素に設定してあるdata属性をconsoleに表示せよ。
     $('#q9').click(function(){
       var text = $(this).data('text')
       console.log(text)
     })
+    // .data()👉$(セレクタ).data(属性名)で属性名を指定することで、個別に取得できる。
+
+
 // 第10問 id='q10'の子要素をクリックしたら、その要素のインデックスと等しいid='q11'の子要素にlargeというクラスを追加せよ。
     $('#q10').find('li').click(function(){
       var num = $(this).index()
       $('#q11').find('li').eq(num).addClass('large')
     })
+    // q10のリスト要素に対して、クリック時に関数を実行
+    // numという変数を宣言し、q10のリスト要素の順番を取得します。
+    // q11のリスト要素の中で、.eq()の引数に応じた、リスト要素だけに対して('large')というクラスを追加するという関数
   });
 </script>
 </body>

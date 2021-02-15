@@ -33,8 +33,8 @@
         // .removeClass() クラスを削除します。
         $('.nav').find('li').click(function(){
           var navNum = $(this).index();
-          $('.contents').find('li').addClass('is-hidden');
-          $('.contents').find('li').eq(navNum).removeClass('is-hidden');
+          $('.contents').find('li').addClass('is-hidden')
+                                   .eq(navNum).removeClass('is-hidden');
         })
         // .navの中のリスト要素をクリックした時、次の関数を実行する
         // .navのリスト要素の順番を取得する変数navNumを宣言する

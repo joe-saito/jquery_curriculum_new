@@ -51,7 +51,7 @@
   </div>
   <h2 class="sub-title">Q9</h2>
   <div class="question">
-    <div class="btn" id="q9" data-text="jQuery">Q9</div>
+    <div class="btn" id="q9" data-text="jQuery" data-number='3'>Q9</div>
   </div>
   <h2 class="sub-title">Q10</h2>
   <div class="question">
@@ -93,7 +93,7 @@
              .after('DOMの後') 
               // afterは指定の要素の後に追加する
 
-          // この形はメゾットチェーンと呼ぶ。
+          // この形はメソッドチェーンと呼ぶ。
           // $(セレクタ).メゾット().メゾット()
     })
 
@@ -130,7 +130,7 @@
     },function(){
       $(this).removeClass('large')
     });
-    // .hover()👉$(セレクタ)をホバーした時のイベント
+    // .hover()👉$(セレクタ)をホバーした時のイベント、２つの引数がある。
     // .addClass('クラス名')👉$(セレクタ)に('クラス名')を追加する
     // .removeClass('クラス名')👉$(セレクタ)の('クラス名')を削除する
 

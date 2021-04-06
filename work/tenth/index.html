@@ -40,21 +40,42 @@
         );
 
         var notFindMes = $(
-           '<p class="error-message">'
+            '<p class="error-message">'
           + "検索結果が見つかりませんでした。"
           + '<br>'
           + "別のキーワードで検索して下さい。"
-          +'</p>'
+          + '</p>'
         );
 
-        var errMes = $(
+        var requestErrMes = $(
             '<p class="error-message">'
-          +'予期せぬエラーが発生しました。'
-          +'<br>'
-          +'ページを再度更新してください。'
-          +'</p>'
+          + "リクエスト過多です。しばらく時間を置いてからお試しください。"
+          + '</p>'
+        );
+
+        var netErrMes = $(
+            '<p class="error-message">'
+          + "通信に失敗しました。インターネットの接続をご確認ください。"
+          + '</p>'
         );
         
+        function removeClass() {
+          $('.lists').find('.lists__item').remove();
+          blankMes.remove();
+          notFindMes.remove();
+          requestErrMes.remove();
+          netErrMes.remove();
+          $('.pager').remove();
+        }
+
+        function prevDisabled() {
+          $(".btn-item").eq(0).addClass('disabled')
+        }
+
+        function nextDisabled() {
+          $(".btn-item").eq(1).addClass('disabled')
+        }
+
         function ajax() {
 
           $.ajax({
@@ -74,7 +95,7 @@
            
             $.each(data.Items, function(key, item) {
               var listsItem = (
-                　'<li class="lists__item">'
+                  '<li class="lists__item">'
                 +   '<div class="lists__item__inner">'
                 +     '<a href= "'+item.Item.itemUrl+'" class="lists__item__link" target="_blank">'
                 +       '<img src= '+item.Item.largeImageUrl+' class="lists__item__img" alt="">'
@@ -105,16 +126,16 @@
             $('.lists').after(pager);
             
             if (dataPage === 1){
-              $(".btn-item").eq(0).addClass('disabled')
+              prevDisabled()
 
             } else if (dataPage === data.pageCount) {
-              $('.btn-item').eq(1).addClass('disabled')
+              nextDisabled()
 
             } ;
             
             if (data.pageCount === 1) {
-              $(".btn-item").eq(0).addClass('disabled')
-              $('.btn-item').eq(1).addClass('disabled')
+              prevDisabled()
+              nextDisabled()
 
             };
 
@@ -123,106 +144,51 @@
               $('.pager').remove();
             };
 
-          }).fail(function(jqXHR, error) {
+          }).fail(function(jqXHR, error, errorCode) {
             
             if ($('.search__text__input').val() === "") {
+              removeClass();
               $('.message').append(blankMes);
-            } else {
-              $('.message').append(errMes);
+            } 
+            
+            if (errorCode === "") {
+              removeClass();
+              $('.message').append(netErrMes);
             };
+
+            if (errorCode === '429') {
+              removeClass();
+              $('.message').append(requestErrMes);
+            }
+
             
           });
 
         };
-
         
         $('.search__btn').on('click',function() {
+          removeClass();
 
-          $('.lists').find('.lists__item').remove();
-          blankMes.remove();
-          notFindMes.remove();
-          errMes.remove();
-          $('.pager').remove();
-
+          dataPage = 1;
           ajax();
           
         });
         
         $(document).on('click', '.btn-item', function(e) {
           e.preventDefault();
-          
-          $('.lists').find('.lists__item').remove();
-          $('.message').remove();
-          $('.pager').remove();
+          removeClass();
           
           if ($(this).data("js") === "page-next") {
             dataPage++;
-            ajax()
+            ajax();
 
           } else {
             dataPage--;
-            ajax()
+            ajax();
 
-          };
+          }
 
-          
         })
-            
-       
-        
-        
-
-        // $(".search__btn").on('click',function(){
-          
-        //   $.ajax({
-        //     url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-        //     type: 'GET',
-        //     datatype: 'json',
-        //     data: {
-        //       applicationId: appId, 
-        //       booksGenreId: '001',
-        //       keyword: $('.search__text__input').val(),
-        //       page: dataPage
-        //     }
-
-        //   }).done(function(data) {
-            
-        //     console.log(data);
-            
-        // $.each(data.Items, function(key, item) {
-          
-        //   listsItem = (
-        //     　'<li class="lists__item">'
-        //     +   '<div class="lists__item__inner">'
-        //     +     '<a href= "'+item.Item.itemUrl+'" class="lists__item__link" target="_blank">'
-        //     +       '<img src= '+item.Item.largeImageUrl+' class="lists__item__img" alt="">'
-        //     +       '<p class="lists__item__detail">作品名：'+item.Item.title+'</p>'
-        //     +       '<p class="lists__item__detail">作者　：'+item.Item.author+'</p>'
-        //     +       '<p class="lists__item__detail">出版社：'+item.Item.publisherName+'</p>'
-        //     +     '</a>'
-        //     +   '</div>'
-        //     + '</li>'
-        //   );
-          
-        //   $(".lists").append(listsItem);
-        // })
-
-        // dataPage = data.page;
-        // pager = (
-        //     '<div class="pager" data-js="pager">'
-        //   +  '<div class="counter">'
-        //   +    '<span class="counter-current">'+data.page+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
-        //   +   '</div>'
-        //   +   '<div class="btn-wrapper">'
-        //   +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
-        //   +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
-        //   +   '</div>'
-        //   + '</div>'
-        // );
-
-        // $('.lists').after(pager);
-
-           
         
         // 楽天ブックスの総合検索APIを使って製作してください。
         // answerの挙動を良く見てね！

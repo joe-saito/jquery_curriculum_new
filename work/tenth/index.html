@@ -70,11 +70,17 @@
 
         function prevDisabled() {
           $(".btn-item").eq(0).addClass('disabled')
-        }
+                              .on('click', function(){
+                                return false;
+                              })
+        };
 
         function nextDisabled() {
           $(".btn-item").eq(1).addClass('disabled')
-        }
+                              .on('click', function(){
+                                return false;
+                              })
+        };
 
         function ajax() {
 
@@ -126,21 +132,16 @@
             $('.lists').after(pager);
             
             if (dataPage === 1){
-              prevDisabled()
-
+              prevDisabled();
             } else if (dataPage === data.pageCount) {
-              nextDisabled()
-
-            } ;
-            
-            if (data.pageCount === 1) {
-              prevDisabled()
-              nextDisabled()
-
+              nextDisabled();
             };
-
+            if (data.pageCount === 1) {
+              prevDisabled();
+              nextDisabled();
+            };
             if (data.hits === 0) {
-              $('.message').append(notFindMes)
+              $('.message').append(notFindMes);
               $('.pager').remove();
             };
 
@@ -161,7 +162,6 @@
               $('.message').append(requestErrMes);
             }
 
-            
           });
 
         };

@@ -35,6 +35,8 @@
 
         var dataPage = 1;
 
+        var ajaxKeyword = 0;
+
         var blankMes = $(
           '<p class="error-message">検索文字が入力されていません。</p>'
         );
@@ -82,7 +84,8 @@
                               })
         };
 
-        function ajax() {
+        function bookAjax() {
+          ajaxKeyword = $('.search__text__input').val();
 
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -91,13 +94,13 @@
             data: {
               applicationId: appId, 
               booksGenreId: '001',
-              keyword: $('.search__text__input').val(),
+              keyword: ajaxKeyword,
               page: dataPage,
               hits: 20
             }
 
           }).done(function(data) {
-            console.log(data);
+            console.log(ajaxKeyword);
            
             $.each(data.Items, function(key, item) {
               var listsItem = (
@@ -168,9 +171,8 @@
         
         $('.search__btn').on('click',function() {
           removeClass();
-
           dataPage = 1;
-          ajax();
+          bookAjax();
           
         });
         
@@ -180,11 +182,11 @@
           
           if ($(this).data("js") === "page-next") {
             dataPage++;
-            ajax();
+            bookAjax();
 
           } else {
             dataPage--;
-            ajax();
+            bookAjax();
 
           }
 

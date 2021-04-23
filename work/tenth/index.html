@@ -85,7 +85,6 @@
         };
 
         function bookAjax() {
-          ajaxKeyword = $('.search__text__input').val();
 
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -172,6 +171,7 @@
         $('.search__btn').on('click',function() {
           removeClass();
           dataPage = 1;
+          ajaxKeyword = $('.search__text__input').val();
           bookAjax();
           
         });

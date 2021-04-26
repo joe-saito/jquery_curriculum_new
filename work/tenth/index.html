@@ -61,14 +61,11 @@
           + '</p>'
         );
         
-        function removeClass() {
-          $('.lists').find('.lists__item').remove();
-          blankMes.remove();
-          notFindMes.remove();
-          requestErrMes.remove();
-          netErrMes.remove();
-          $('.pager').remove();
-        }
+        function emptyClass() {
+          $(".message").empty();
+          $(".lists").empty();
+          $(".pager").remove();
+        };
 
         function prevDisabled() {
           $(".btn-item").eq(0).addClass('disabled')
@@ -84,7 +81,7 @@
                               })
         };
 
-        function bookAjax() {
+        function ajax() {
 
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -99,17 +96,17 @@
             }
 
           }).done(function(data) {
-            console.log(ajaxKeyword);
+            console.log(data)
            
-            $.each(data.Items, function(key, item) {
+            $.each(data.Items, function(key, apiOutput) {
               var listsItem = (
                   '<li class="lists__item">'
                 +   '<div class="lists__item__inner">'
-                +     '<a href= "'+item.Item.itemUrl+'" class="lists__item__link" target="_blank">'
-                +       '<img src= '+item.Item.largeImageUrl+' class="lists__item__img" alt="">'
-                +       '<p class="lists__item__detail">作品名：'+item.Item.title+'</p>'
-                +       '<p class="lists__item__detail">作者　：'+item.Item.author+'</p>'
-                +       '<p class="lists__item__detail">出版社：'+item.Item.publisherName+'</p>'
+                +     '<a href= "'+apiOutput.Item.itemUrl+'" class="lists__item__link" target="_blank">'
+                +       '<img src= '+apiOutput.Item.largeImageUrl+' class="lists__item__img" alt="">'
+                +       '<p class="lists__item__detail">作品名：'+apiOutput.Item.title+'</p>'
+                +       '<p class="lists__item__detail">作者　：'+apiOutput.Item.author+'</p>'
+                +       '<p class="lists__item__detail">出版社：'+apiOutput.Item.publisherName+'</p>'
                 +     '</a>'
                 +   '</div>'
                 + '</li>'
@@ -118,7 +115,6 @@
               $(".lists").append(listsItem);
             });
 
-            dataPage = data.page;
               var pager = (
                   '<div class="pager" data-js="pager">'
                 +  '<div class="counter">'
@@ -138,10 +134,12 @@
             } else if (dataPage === data.pageCount) {
               nextDisabled();
             };
+
             if (data.pageCount === 1) {
               prevDisabled();
               nextDisabled();
             };
+
             if (data.hits === 0) {
               $('.message').append(notFindMes);
               $('.pager').remove();
@@ -150,47 +148,47 @@
           }).fail(function(jqXHR, error, errorCode) {
             
             if ($('.search__text__input').val() === "") {
-              removeClass();
+              emptyClass();
               $('.message').append(blankMes);
-            } 
+            };
             
             if (errorCode === "") {
-              removeClass();
+              emptyClass();
               $('.message').append(netErrMes);
             };
 
             if (errorCode === '429') {
-              removeClass();
+              emptyClass();
               $('.message').append(requestErrMes);
-            }
+            };
 
           });
 
         };
         
         $('.search__btn').on('click',function() {
-          removeClass();
+          emptyClass();
           dataPage = 1;
           ajaxKeyword = $('.search__text__input').val();
-          bookAjax();
+          ajax();
           
         });
         
         $(document).on('click', '.btn-item', function(e) {
           e.preventDefault();
-          removeClass();
+          emptyClass();
           
           if ($(this).data("js") === "page-next") {
             dataPage++;
-            bookAjax();
+            ajax();
 
           } else {
             dataPage--;
-            bookAjax();
+            ajax();
 
-          }
+          };
 
-        })
+        });
         
         // 楽天ブックスの総合検索APIを使って製作してください。
         // answerの挙動を良く見てね！

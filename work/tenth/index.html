@@ -71,14 +71,14 @@
           $(".btn-item").eq(0).addClass('disabled')
                               .on('click', function(){
                                 return false;
-                              })
+                              });
         };
 
         function nextDisabled() {
           $(".btn-item").eq(1).addClass('disabled')
                               .on('click', function(){
                                 return false;
-                              })
+                              });
         };
 
         function ajax() {
@@ -115,18 +115,19 @@
               $(".lists").append(listsItem);
             });
 
-              var pager = (
-                  '<div class="pager" data-js="pager">'
-                +  '<div class="counter">'
-                +    '<span class="counter-current">'+dataPage+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
-                +   '</div>'
-                +   '<div class="btn-wrapper">'
-                +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
-                +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
-                +   '</div>'
-                + '</div>'
-              
+            var pager = (
+                '<div class="pager" data-js="pager">'
+              +  '<div class="counter">'
+              +    '<span class="counter-current">'+dataPage+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
+              +   '</div>'
+              +   '<div class="btn-wrapper">'
+              +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
+              +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
+              +   '</div>'
+              + '</div>'
+                
             );
+            
             $('.lists').after(pager);
             
             if (dataPage === 1){
@@ -146,27 +147,26 @@
             };
 
           }).fail(function(jqXHR, error, errorCode) {
-            
-            if ($('.search__text__input').val() === "") {
-              emptyClass();
-              $('.message').append(blankMes);
-            };
-            
-            if (errorCode === "") {
-              emptyClass();
-              $('.message').append(netErrMes);
-            };
+            emptyClass();
 
-            if (errorCode === '429') {
-              emptyClass();
-              $('.message').append(requestErrMes);
+            switch (errorCode) {
+
+              case "Bad Request":
+                $('.message').append(blankMes);
+                break;
+              case "":
+                $(".message").append(netErrMes);
+                break;
+              case "429":
+                $(".message").append(requestErrMes);
+
             };
 
           });
 
         };
         
-        $('.search__btn').on('click',function() {
+        $('.search__btn').on('click',function() { //検索ボタンをクリック
           emptyClass();
           dataPage = 1;
           ajaxKeyword = $('.search__text__input').val();
@@ -182,7 +182,7 @@
             dataPage++;
             ajax();
 
-          } else {
+          } else if ($(this).data("js") === "page-prev") {
             dataPage--;
             ajax();
 

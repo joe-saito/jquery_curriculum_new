@@ -33,9 +33,47 @@
       
       $(function() {
 
-        var dataPage = 1;
+        function ajaxListItem(data){
 
-        var ajaxKeyword = 0;
+          $.each(data.Items, function(key, apiOutput) {//data.Itemsの数だけ処理を実行
+              var listsItem = (
+                  '<li class="lists__item">'
+                +   '<div class="lists__item__inner">'
+                +     '<a href= "'+apiOutput.Item.itemUrl+'" class="lists__item__link" target="_blank">'
+                +       '<img src= '+apiOutput.Item.largeImageUrl+' class="lists__item__img" alt="">'
+                +       '<p class="lists__item__detail">作品名：'+apiOutput.Item.title+'</p>'
+                +       '<p class="lists__item__detail">作者　：'+apiOutput.Item.author+'</p>'
+                +       '<p class="lists__item__detail">出版社：'+apiOutput.Item.publisherName+'</p>'
+                +     '</a>'
+                +   '</div>'
+                + '</li>'
+              );
+              
+              $(".lists").append(listsItem);//data.Itemの数だけ変数listsItemを追加する
+            });
+
+          if (data.hits === 0) {//検索結果がない場合の処理
+            $('.message').append(notFindMes);
+            $('.pager').remove();
+          };
+        }        
+
+        function ajaxPager(data) {
+          pager = (
+                '<div class="pager" data-js="pager">'
+              +  '<div class="counter">'
+              +    '<span class="counter-current">'+data.page+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
+              +   '</div>'
+              +   '<div class="btn-wrapper">'
+              +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
+              +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
+              +   '</div>'
+              + '</div>'
+                
+            );
+
+            $('.lists').after(pager);
+        }
 
         var blankMes = $(
           '<p class="error-message">検索文字が入力されていません。</p>'
@@ -62,24 +100,45 @@
         );
         
         function emptyClass() {
-          $(".message").empty();
+          $(".message").empty();//messageの中の要素を空にする
           $(".lists").empty();
-          $(".pager").remove();
+          $(".pager").remove();//pagerクラスを削除
         };
 
-        function prevDisabled() {
-          $(".btn-item").eq(0).addClass('disabled')
-                              .on('click', function(){
-                                return false;
-                              });
-        };
+        function ajaxFail(errorCode) {
+          emptyClass();
 
-        function nextDisabled() {
-          $(".btn-item").eq(1).addClass('disabled')
-                              .on('click', function(){
-                                return false;
-                              });
-        };
+          switch (errorCode) {
+
+            case "Bad Request":
+            $('.message').append(blankMes);
+            break;
+
+            case "":
+            $(".message").append(netErrMes);
+            break;
+
+            case "429":
+            $(".message").append(requestErrMes);
+
+          };
+        }
+
+        function disabledBtn(data) {
+          if (dataPage === 1 || data.pageCount　=== 1) {//検索結果が１ページ目と1ページしかない時
+            $(".btn-item").eq(0).addClass('disabled')//前へボタンを無効化
+                                .on('click', function(){//クリックを無効化
+                                  return false;
+                                });
+          };
+          
+          if (dataPage === data.pageCount){//検索結果のページが最後だった時
+            $(".btn-item").eq(1).addClass('disabled')//次へボタンを無効化
+                                .on('click', function(){
+                                  return false;
+                                });
+          };
+        }
 
         function ajax() {
 
@@ -96,99 +155,43 @@
             }
 
           }).done(function(data) {
-            console.log(data)
-           
-            $.each(data.Items, function(key, apiOutput) {
-              var listsItem = (
-                  '<li class="lists__item">'
-                +   '<div class="lists__item__inner">'
-                +     '<a href= "'+apiOutput.Item.itemUrl+'" class="lists__item__link" target="_blank">'
-                +       '<img src= '+apiOutput.Item.largeImageUrl+' class="lists__item__img" alt="">'
-                +       '<p class="lists__item__detail">作品名：'+apiOutput.Item.title+'</p>'
-                +       '<p class="lists__item__detail">作者　：'+apiOutput.Item.author+'</p>'
-                +       '<p class="lists__item__detail">出版社：'+apiOutput.Item.publisherName+'</p>'
-                +     '</a>'
-                +   '</div>'
-                + '</li>'
-              );
-              
-              $(".lists").append(listsItem);
-            });
-
-            var pager = (
-                '<div class="pager" data-js="pager">'
-              +  '<div class="counter">'
-              +    '<span class="counter-current">'+dataPage+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
-              +   '</div>'
-              +   '<div class="btn-wrapper">'
-              +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
-              +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
-              +   '</div>'
-              + '</div>'
-                
-            );
-            
-            $('.lists').after(pager);
-            
-            if (dataPage === 1){
-              prevDisabled();
-            } else if (dataPage === data.pageCount) {
-              nextDisabled();
-            };
-
-            if (data.pageCount === 1) {
-              prevDisabled();
-              nextDisabled();
-            };
-
-            if (data.hits === 0) {
-              $('.message').append(notFindMes);
-              $('.pager').remove();
-            };
+            ajaxListItem(data);//引数dataを使用し、関数を実行
+            ajaxPager(data);
+            disabledBtn(data);
 
           }).fail(function(jqXHR, error, errorCode) {
-            emptyClass();
-
-            switch (errorCode) {
-
-              case "Bad Request":
-                $('.message').append(blankMes);
-                break;
-              case "":
-                $(".message").append(netErrMes);
-                break;
-              case "429":
-                $(".message").append(requestErrMes);
-
-            };
+            ajaxFail(errorCode);
 
           });
 
         };
         
-        $('.search__btn').on('click',function() { //検索ボタンをクリック
-          emptyClass();
-          dataPage = 1;
-          ajaxKeyword = $('.search__text__input').val();
-          ajax();
+        $('.search__btn').on('click',function(data) { //検索ボタンをクリック
+          emptyClass();//追加したDOMを空にする関数を実行
+          dataPage = 1;//検索ボタンをクリックした時、必ず１ページ目を表示させる
+          ajaxKeyword = $('.search__text__input').val();//検索ボタンをクリックした時だけ検索欄の文字列を検索
+          ajax();//ajax関数の実行
           
         });
         
         $(document).on('click', '.btn-item', function(e) {
-          e.preventDefault();
+          e.preventDefault();//aタグのリンク遷移を無効化
           emptyClass();
-          
-          if ($(this).data("js") === "page-next") {
+
+          if ($(this).data('js') === "page-prev") {
+            dataPage--;//dataPageのカウントを1つ増やす
+            ajax();
+
+          } else if ($(this).data('js') === "page-next") {
             dataPage++;
             ajax();
-
-          } else if ($(this).data("js") === "page-prev") {
-            dataPage--;
-            ajax();
-
-          };
+          }
 
         });
+
+        
+
+
         
         // 楽天ブックスの総合検索APIを使って製作してください。
         // answerの挙動を良く見てね！

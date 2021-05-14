@@ -32,47 +32,48 @@
     <script>
       
       $(function() {
-
-        function ajaxListItem(data){
-
-          $.each(data.Items, function(key, apiOutput) {//data.Itemsの数だけ処理を実行
-              var listsItem = (
-                  '<li class="lists__item">'
-                +   '<div class="lists__item__inner">'
-                +     '<a href= "'+apiOutput.Item.itemUrl+'" class="lists__item__link" target="_blank">'
-                +       '<img src= '+apiOutput.Item.largeImageUrl+' class="lists__item__img" alt="">'
-                +       '<p class="lists__item__detail">作品名：'+apiOutput.Item.title+'</p>'
-                +       '<p class="lists__item__detail">作者　：'+apiOutput.Item.author+'</p>'
-                +       '<p class="lists__item__detail">出版社：'+apiOutput.Item.publisherName+'</p>'
-                +     '</a>'
-                +   '</div>'
-                + '</li>'
-              );
-              
-              $(".lists").append(listsItem);//data.Itemの数だけ変数listsItemを追加する
-            });
-
+        function ListItemShow(data) {
+          var listsItem = '';
+          $.each(data.Items, function(key, val) {//data.Itemsの数だけ処理を実行
+            listsItem += (
+                '<li class="lists__item">'
+              +   '<div class="lists__item__inner">'
+              +     '<a href= "'+val.Item.itemUrl+'" class="lists__item__link" target="_blank">'
+              +       '<img src= '+val.Item.largeImageUrl+' class="lists__item__img" alt="">'
+              +       '<p class="lists__item__detail">作品名：'+val.Item.title+'</p>'
+              +       '<p class="lists__item__detail">作者　：'+val.Item.author+'</p>'
+              +       '<p class="lists__item__detail">出版社：'+val.Item.publisherName+'</p>'
+              +     '</a>'
+              +   '</div>'
+              + '</li>'
+            )
+          });
+          $(".lists").append(listsItem);//data.Itemの数だけ変数listsItemを追加する
           if (data.hits === 0) {//検索結果がない場合の処理
             $('.message').append(notFindMes);
             $('.pager').remove();
           };
         }        
 
-        function ajaxPager(data) {
-          pager = (
-                '<div class="pager" data-js="pager">'
-              +  '<div class="counter">'
-              +    '<span class="counter-current">'+data.page+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
-              +   '</div>'
-              +   '<div class="btn-wrapper">'
-              +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
-              +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
-              +   '</div>'
-              + '</div>'
-                
-            );
-
-            $('.lists').after(pager);
+        function pagerShow(data) {
+          var pager = (
+              '<div class="pager" data-js="pager">'
+            +  '<div class="counter">'
+            +    '<span class="counter-current">'+data.page+'</span>/<span class="counter-all">'+data.pageCount+'</span>'
+            +   '</div>'
+            +   '<div class="btn-wrapper">'
+            +     '<a class="btn-item" data-js="page-prev" href="">前へ</a>'
+            +     '<a class="btn-item" data-js="page-next" href="">次へ</a>'
+            +   '</div>'
+            + '</div>'
+          );
+          $('.lists').after(pager);
+          if (dataPage === 1 || data.pageCount　=== 1) {//検索結果が１ページ目と1ページしかない時
+            $('[data-js="page-prev"]').addClass('disabled')//前へボタンを無効化
+          };
+          if (dataPage === data.pageCount) {//検索結果のページが最後だった時
+            $('[data-js="page-next"]').addClass('disabled')//次へボタンを無効化
+          };
         }
 
         var blankMes = $(
@@ -99,49 +100,27 @@
           + '</p>'
         );
         
-        function emptyClass() {
+        function classEmpty() {
           $(".message").empty();//messageの中の要素を空にする
           $(".lists").empty();
           $(".pager").remove();//pagerクラスを削除
         };
 
         function ajaxFail(errorCode) {
-          emptyClass();
-
-          switch (errorCode) {
-
-            case "Bad Request":
+          classEmpty();
+          switch (errorCode.status) {
+            case 400:
             $('.message').append(blankMes);
             break;
-
-            case "":
+            case 0:
             $(".message").append(netErrMes);
             break;
-
-            case "429":
+            case 429:
             $(".message").append(requestErrMes);
-
-          };
-        }
-
-        function disabledBtn(data) {
-          if (dataPage === 1 || data.pageCount　=== 1) {//検索結果が１ページ目と1ページしかない時
-            $(".btn-item").eq(0).addClass('disabled')//前へボタンを無効化
-                                .on('click', function(){//クリックを無効化
-                                  return false;
-                                });
-          };
-          
-          if (dataPage === data.pageCount){//検索結果のページが最後だった時
-            $(".btn-item").eq(1).addClass('disabled')//次へボタンを無効化
-                                .on('click', function(){
-                                  return false;
-                                });
           };
         }
 
         function ajax() {
-
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
             type: 'GET',
@@ -153,40 +132,33 @@
               page: dataPage,
               hits: 20
             }
-
           }).done(function(data) {
-            ajaxListItem(data);//引数dataを使用し、関数を実行
-            ajaxPager(data);
-            disabledBtn(data);
-
-          }).fail(function(jqXHR, error, errorCode) {
+            ListItemShow(data);//引数dataを使用し、関数を実行
+            pagerShow(data);
+          }).fail(function(errorCode) {
             ajaxFail(errorCode);
-
           });
-
         };
         
-        $('.search__btn').on('click',function(data) { //検索ボタンをクリック
-          emptyClass();//追加したDOMを空にする関数を実行
-          dataPage = 1;//検索ボタンをクリックした時、必ず１ページ目を表示させる
-          ajaxKeyword = $('.search__text__input').val();//検索ボタンをクリックした時だけ検索欄の文字列を検索
+        $('[data-js="search-btn"]').on('click',function() { //検索ボタンをクリック
+          classEmpty();//追加したDOMを空にする関数を実行
+          dataPage = 1;//検索ボタンをクリックした時、必ず１ページ目を表示させる　再代入
+          ajaxKeyword = $('[data-js="search-word"]').val();//検索ボタンをクリックした時だけ検索欄の文字列を検索
           ajax();//ajax関数の実行
-          
         });
-        
-        $(document).on('click', '.btn-item', function(e) {
-          e.preventDefault();//aタグのリンク遷移を無効化
-          emptyClass();
 
-          if ($(this).data('js') === "page-prev") {
-            dataPage--;//dataPageのカウントを1つ増やす
-            ajax();
+        $(document).on('click', '[data-js="page-prev"]', function(e) {
+          e.preventDefault();
+          classEmpty();
+          dataPage--;
+          ajax();
+        });
 
-          } else if ($(this).data('js') === "page-next") {
-            dataPage++;
-            ajax();
-          }
-
+        $(document).on('click', '[data-js="page-next"]', function(e) {
+          e.preventDefault();
+          classEmpty();
+          dataPage++;
+          ajax();
         });
 
         

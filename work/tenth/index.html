@@ -120,6 +120,8 @@
           };
         }
 
+        var pagerPageCount = '';
+        
         function ajax() {
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -133,6 +135,7 @@
               hits: 20
             }
           }).done(function(data) {
+            pagerPageCount = data.pageCount;
             ListItemShow(data);//引数dataを使用し、関数を実行
             pagerShow(data);
           }).fail(function(errorCode) {
@@ -140,14 +143,17 @@
           });
         };
         
-        $('[data-js="search-btn"]').on('click',function() { //検索ボタンをクリック
+        $('[data-js="search-btn"]').on('click', function() { //検索ボタンをクリック
           classEmpty();//追加したDOMを空にする関数を実行
           dataPage = 1;//検索ボタンをクリックした時、必ず１ページ目を表示させる　再代入
           ajaxKeyword = $('[data-js="search-word"]').val();//検索ボタンをクリックした時だけ検索欄の文字列を検索
           ajax();//ajax関数の実行
         });
-
+        
         $(document).on('click', '[data-js="page-prev"]', function(e) {
+          if (dataPage === 1 || pagerPageCount === 1) {
+            return false;
+          };
           e.preventDefault();
           classEmpty();
           dataPage--;
@@ -155,6 +161,9 @@
         });
 
         $(document).on('click', '[data-js="page-next"]', function(e) {
+          if (dataPage === pagerPageCount) {
+            return false;
+          };
           e.preventDefault();
           classEmpty();
           dataPage++;

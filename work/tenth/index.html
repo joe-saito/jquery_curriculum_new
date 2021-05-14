@@ -32,7 +32,14 @@
     <script>
       
       $(function() {
+        var minPageLimit = 1;
+
         function ListItemShow(data) {
+          if (data.hits === 0) {//検索結果がない場合の処理
+            $('.message').append(notFindMes);
+            $('.pager').remove();
+            return;
+          };
           var listsItem = '';
           $.each(data.Items, function(key, val) {//data.Itemsの数だけ処理を実行
             listsItem += (
@@ -49,10 +56,6 @@
             )
           });
           $(".lists").append(listsItem);//data.Itemの数だけ変数listsItemを追加する
-          if (data.hits === 0) {//検索結果がない場合の処理
-            $('.message').append(notFindMes);
-            $('.pager').remove();
-          };
         }        
 
         function pagerShow(data) {
@@ -68,7 +71,7 @@
             + '</div>'
           );
           $('.lists').after(pager);
-          if (dataPage === 1 || data.pageCount　=== 1) {//検索結果が１ページ目と1ページしかない時
+          if (dataPage === minPageLimit || data.pageCount　=== minPageLimit) {//検索結果が１ページ目と1ページしかない時
             $('[data-js="page-prev"]').addClass('disabled')//前へボタンを無効化
           };
           if (dataPage === data.pageCount) {//検索結果のページが最後だった時
@@ -94,6 +97,12 @@
           + '</p>'
         );
 
+        var defaultErrMes = $(
+          '<p class="error-message">'
+          + "予期せぬエラーが発生しました。"
+          + '</p>'
+        );
+
         var netErrMes = $(
             '<p class="error-message">'
           + "通信に失敗しました。インターネットの接続をご確認ください。"
@@ -109,19 +118,23 @@
         function ajaxFail(errorCode) {
           classEmpty();
           switch (errorCode.status) {
-            case 400:
-            $('.message').append(blankMes);
-            break;
             case 0:
-            $(".message").append(netErrMes);
-            break;
+              $(".message").append(netErrMes);
+              break;
+            case 400:
+              $('.message').append(blankMes);
+              break;
             case 429:
-            $(".message").append(requestErrMes);
+              $(".message").append(requestErrMes);
+              break;
+            default:
+              $(".message").append(defaultErrMes);
+              break;
           };
         }
 
         var pagerPageCount = '';
-        
+
         function ajax() {
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -136,8 +149,8 @@
             }
           }).done(function(data) {
             pagerPageCount = data.pageCount;
-            ListItemShow(data);//引数dataを使用し、関数を実行
             pagerShow(data);
+            ListItemShow(data);//引数dataを使用し、関数を実行
           }).fail(function(errorCode) {
             ajaxFail(errorCode);
           });
@@ -150,8 +163,9 @@
           ajax();//ajax関数の実行
         });
         
+        
         $(document).on('click', '[data-js="page-prev"]', function(e) {
-          if (dataPage === 1 || pagerPageCount === 1) {
+          if (dataPage === minPageLimit || pagerPageCount === minPageLimit) {
             return false;
           };
           e.preventDefault();
